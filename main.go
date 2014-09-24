@@ -26,9 +26,14 @@ func (a ByDateLoved) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByDateLoved) Less(i, j int) bool { return a[i].DateLoved > a[j].DateLoved }
 
 func main() {
+	serverURL := "127.0.0.1:4567"
 	http.HandleFunc("/api/grab", getSongs)
 	http.Handle("/", http.FileServer(http.Dir('.')))
-	http.ListenAndServe(":8080", nil)
+	log.Println("Starting...", serverURL)
+	err := http.ListenAndServe(serverURL, nil)
+	if err != nil {
+		log.Fatal("Failed to start!", err)
+	}
 }
 
 func getSongs(w http.ResponseWriter, r *http.Request) {
