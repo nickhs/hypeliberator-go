@@ -11,6 +11,7 @@ import "sort"
 import "github.com/mitchellh/mapstructure"
 
 const API_KEY = "51356937edaa4eeef5a3f6ba7e52f0d7"
+const REQ_BURST_SIZE = 20
 
 type SongData struct {
 	Name      string `mapstructure:"title" json:"title"`
@@ -37,7 +38,13 @@ func main() {
 }
 
 func getSongs(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Query()["username"][0]
+
+	username := r.URL.Query().Get("username")
+	if len(username) == 0 {
+		http.Error(w, "Need to specify a username as a query parameter", http.StatusBadRequest)
+		return
+	}
+
 	log.Println("username is " + username)
 
 	data, err := query(username)
@@ -55,10 +62,8 @@ func getSongs(w http.ResponseWriter, r *http.Request) {
 }
 
 func query(username string) ([]SongData, error) {
-	var burstSize = 20
-
-	songs := make(chan []SongData, burstSize)
-	errs := make(chan error, burstSize)
+	songs := make(chan []SongData, REQ_BURST_SIZE)
+	errs := make(chan error, REQ_BURST_SIZE)
 
 	var currentIndex = 1
 	var songData []SongData
@@ -71,7 +76,7 @@ requestLoop:
 			close(songs)
 			break requestLoop
 		default:
-			for i := 0; i < burstSize; i++ {
+			for i := 0; i < REQ_BURST_SIZE; i++ {
 				index := currentIndex + i
 				go func(index int) {
 					newSongs, err := getSong(username, index)
@@ -86,15 +91,15 @@ requestLoop:
 					songs <- newSongs
 				}(index)
 			}
-			currentIndex += burstSize
+
+			currentIndex += REQ_BURST_SIZE
 		}
 
-		for idx := 0; idx < burstSize; idx++ {
+		for idx := 0; idx < REQ_BURST_SIZE; idx++ {
 			songItem, ok := <-songs
 
 			if ok != true {
 				log.Fatal("RUHROH - that shouldn't happen!")
-				continue
 			}
 
 			songData = append(songData, songItem...)
