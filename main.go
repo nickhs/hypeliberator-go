@@ -41,7 +41,7 @@ func (a ByDateLoved) Less(i, j int) bool { return a[i].DateLoved > a[j].DateLove
 // Main starts the web service and listens in on localhost:4567 by default
 // TODO(nickhs): Add in command line argument parsing to change these defaults
 func main() {
-	serverURL := "127.0.0.1:4567"
+	serverURL := "0.0.0.0:4567"
 
 	// map the api call to getSongs
 	http.HandleFunc("/api/grab", getSongs)
@@ -179,8 +179,8 @@ requestLoop:
 // Fetches and transforms a JSON response
 // from Hype Machine and get back a SongData[] slice.
 func getSong(username string, index int) ([]SongData, error) {
-	log.Printf("About to query %s [%d]", username, index)
 	url := fmt.Sprintf("http://api.hypem.com/playlist/loved/%s/json/%d/data.js?key=%s", username, index, API_KEY)
+	log.Printf("About to query %s [%d] - %s", username, index, url)
 	client := &http.Client{}
 
 	// Logic to build the request
