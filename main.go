@@ -17,7 +17,7 @@ const API_KEY = "51356937edaa4eeef5a3f6ba7e52f0d7"
 // REQ_BURST_SIZE is the number of concurrent requests
 // created at the end of each run - where a run is a
 // burst of requests.
-const REQ_BURST_SIZE = 20
+const REQ_BURST_SIZE = 5
 
 // SongData represents a bridge structure to extract the data
 // from the Hype Machine service pass it onto the Hype Liberator
