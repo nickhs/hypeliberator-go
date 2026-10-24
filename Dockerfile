@@ -1,15 +1,12 @@
-FROM golang:1.12-alpine3.9 AS build
+FROM golang:1-alpine3.24 AS build
 
-RUN apk add --no-cache git
-
-RUN go get github.com/mitchellh/mapstructure 
-
-RUN mkdir /build
 WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
 COPY main.go .
-RUN go build -o hypeliberator-go
+RUN CGO_ENABLED=0 go build -o hypeliberator-go
 
-FROM alpine:3.9
+FROM alpine:3.24
 
 RUN apk add --no-cache ca-certificates
 
@@ -19,4 +16,4 @@ COPY --from=build /build/hypeliberator-go /srv/hypeliberator-go
 
 WORKDIR /srv
 EXPOSE 4567
-CMD ./hypeliberator-go
+CMD ["./hypeliberator-go"]

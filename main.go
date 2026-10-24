@@ -242,7 +242,7 @@ func getSong(username string, index int) ([]SongData, error) {
 		var song SongData
 		err = mapstructure.Decode(value, &song)
 		if err != nil {
-			log.Println("Failed to decode! %v", value)
+			log.Printf("Failed to decode! %v", value)
 			continue
 		}
 
